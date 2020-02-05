@@ -14,7 +14,7 @@ config = extendDeep(defaultConfig, config.aws);
 const agent = config.agent;
 delete config.agent;
 AWS.config.update(
-    (config.aws, {
+    (config, {
         httpOptions: {
             agent: new https.Agent(agent.httpOptions)
         }
