@@ -1,0 +1,24 @@
+{
+  "name": "jaeger-sqs",
+  "version": "1.0.0",
+  "description": "aws sqs lib wrapper with limiter and jaeger tracing for appquarium",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infrasrc/jaeger-sqs.git"
+  },
+  "author": "Shani Heiman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/infrasrc/jaeger-sqs/issues"
+  },
+  "homepage": "https://github.com/infrasrc/jaeger-sqs#readme",
+  "dependencies": {
+    "bottleneck": "^2.19.5",
+    "config": "^3.2.5",
+    "jaeger-tracer": "git+https://github.com/infrasrc/jaeger-tracer.git"
+  }
+}
