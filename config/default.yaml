@@ -1,4 +1,5 @@
-httpOptions:
-  keepAlive: true
-  maxSockets: 1000
-  maxFreeSockets: 500
+agent:
+  httpOptions:
+    keepAlive: true
+    maxSockets: 1000
+    maxFreeSockets: 500

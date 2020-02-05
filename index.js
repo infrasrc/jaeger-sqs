@@ -11,10 +11,12 @@ const { Tags, FORMAT_TEXT_MAP, globalTracer } = opentracing;
 const tracer = globalTracer();
 
 config = extendDeep(defaultConfig, config.aws);
+const agent = config.agent;
+delete config.agent;
 AWS.config.update(
     (config.aws, {
         httpOptions: {
-            agent: new https.Agent(config.httpOptions)
+            agent: new https.Agent(agent.httpOptions)
         }
     })
 );
