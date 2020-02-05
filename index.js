@@ -1,7 +1,7 @@
 const config                                  = require('config');
 const path                                    = require('path');
 const AWS                                     = require('aws-sdk');
-const { extendDeep ,loadFileConfigs }         = config.util;
+const { extendDeep, loadFileConfigs }         = config.util;
 const ourConfigDir                            = path.join(__dirname, 'config');
 const defaultConfig                           = loadFileConfigs(ourConfigDir);
 const Tracer                                  = require('jaeger-tracer');
@@ -9,15 +9,11 @@ const opentracing                             = Tracer.opentracing;
 const { Tags, FORMAT_TEXT_MAP, globalTracer } = opentracing;
 const tracer                                  = globalTracer();
 
-config = extendDeep(defaultConfig.config, config);
+config = extendDeep(defaultConfig.config, config.aws);
 AWS.config.update(
-    extendDeep(config.aws, {
+     (config.aws, {
         httpOptions: {
-            agent: new https.Agent({
-                keepAlive     : true,
-                maxSockets    : 1000,
-                maxFreeSockets: 500
-            })
+            agent: new https.Agent(config.httpOptions)
         }
     })
 );

@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/infrasrc/jaeger-sqs#readme",
   "dependencies": {
+    "aws-sdk": "^2.611.0",
     "bottleneck": "^2.19.5",
     "config": "^3.2.5",
     "jaeger-tracer": "git+https://github.com/infrasrc/jaeger-tracer.git"

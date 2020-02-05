@@ -1,5 +1,4 @@
-aws:
-  endpoint: "http://localstack:4576"
-  accessKeyId: abc
-  secretAccessKey: abc
-  region: us-east-1
+httpOptions:
+  keepAlive: true
+  maxSockets: 1000
+  maxFreeSockets: 500
