@@ -9,6 +9,7 @@ const Tracer = require('jaeger-tracer');
 const opentracing = Tracer.opentracing;
 const { Tags, FORMAT_TEXT_MAP, globalTracer } = opentracing;
 const tracer = globalTracer();
+const _ = require('lodash/fp');
 
 config = extendDeep(defaultConfig, config.aws);
 const agent = config.agent;
