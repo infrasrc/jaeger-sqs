@@ -1,4 +1,4 @@
-const config = require('config');
+let config = require('config');
 const path = require('path');
 const https = require('https');
 const AWS = require('aws-sdk');
