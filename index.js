@@ -32,30 +32,29 @@ const getSpanFromArgs = (args) => {
     return { newArgs, parentSpan };
 };
 
-const endSpan = (sendMessagePromise, span) => {
-    const timeoutPromise = new Promise((resolve) => {
-        span.timeout = setTimeout(() => {
-            resolve('timeout');
-        }, TEN_MINUTES_IN_MS);
-    });     
-    return Promise.race([
-        sendMessagePromise,
-        timeoutPromise
-    ]).then((res) => {
-        if(span.timeout) clearTimeout(span.timeout);
-        if('timeout' === res) span.setTag("timeout", true);
-        span.finish();
-    }).catch((error) => {
+const timeoutPromise = (span) => new Promise((resolve) => {
+    span.timeout = setTimeout(() => {
+        resolve('timeout');
+    }, TEN_MINUTES_IN_MS);
+});
+
+const endSpan = async (sendMessagePromise, span) => {    
+    try {
+        const res = await Promise.race([sendMessagePromise, timeoutPromise(span)]);
+        if (span.timeout) clearTimeout(span.timeout);
+        if ('timeout' === res) span.setTag("timeout", true);
+    }
+    catch (error) {
         span.setTag(Tags.ERROR, true);
         span.log({
             event: 'error',
             'error.object': error,
         });
-        span.finish();
-    });
+    }
+    span.finish();
 }
 
-const sendMessageAsync = async (...args) => {
+const sendMessageAsync = (...args) => {
     const traceConfig = {};
     const { newArgs, parentSpan } = getSpanFromArgs(args);
     args = newArgs;
@@ -93,7 +92,7 @@ const sendMessageAsync = async (...args) => {
     return endSpan(sqsClient.sendMessage(...args).promise(), span);
 };
 
-const sendMessageBatchAsync = async (...args) => {
+const sendMessageBatchAsync = (...args) => {
     const traceConfig = {};
     const { newArgs, parentSpan } = getSpanFromArgs(args);
     args = newArgs;
