@@ -25,7 +25,6 @@ AWS.config.update(
 
 const sqsClient = new AWS.SQS();
 
-//Set for every queue a uninque limiter.
 const getSpanFromArgs = (args) => {
     const parentSpan = _.find((arg) => arg.constructor.name === 'Span')(args);
     const newArgs = _.pull(parentSpan)(args);
