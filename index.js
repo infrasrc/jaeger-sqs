@@ -22,6 +22,8 @@ AWS.config.update(
     })
 );
 
+const sqsClient = new AWS.SQS();
+
 //Set for every queue a uninque limiter.
 const getSpanFromArgs = (args) => {
     const parentSpan = _.find((arg) => arg.constructor.name === 'Span')(args);
@@ -52,12 +54,13 @@ const sendMessageAsync = async (...args) => {
     if (params) {
         span.setTag(Tags.SPAN_KIND, Tags.SPAN_KIND_MESSAGING_PRODUCER);
         tracer.inject(span, FORMAT_TEXT_MAP, carrier);
-        params.MessageAttributes = {
+        const messageAttributes = {
             'traceId': {
                 DataType: 'String',
                 StringValue: carrier['uber-trace-id']
             }
         };
+        params.MessageAttributes = _.merge(params.MessageAttributes, messageAttributes);
     }
 
     return endSpan(sqsClient.sendMessage(...args).promise(), span);
@@ -75,12 +78,13 @@ const sendMessageBatchAsync = async (...args) => {
         span.setTag(Tags.SPAN_KIND, Tags.SPAN_KIND_MESSAGING_PRODUCER);
         tracer.inject(span, FORMAT_TEXT_MAP, carrier);
         _.each((entery) => {
-            entery.MessageAttributes = {
+            const messageAttributes = {
                 'traceId': {
                     DataType: 'String',
                     StringValue: carrier['uber-trace-id']
                 }
             };
+            entery.MessageAttributes = _.merge(entery.MessageAttributes, messageAttributes);
         })(params.Entries);
     }
     return endSpan(sqsClient.sendMessageBatch(...args).promise(), span);
