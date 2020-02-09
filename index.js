@@ -49,10 +49,25 @@ const sendMessageAsync = async (...args) => {
     args = newArgs;
     if (parentSpan) traceConfig.childOf = parentSpan;
     const params = _.find((arg) => 1 + _.indexOf('QueueUrl', _.keysIn(arg)))(args);
-    const span = tracer.startSpan('type', traceConfig);
+    const span = tracer.startSpan('send message', traceConfig);
     const carrier = {};
     if (params) {
         span.setTag(Tags.SPAN_KIND, Tags.SPAN_KIND_MESSAGING_PRODUCER);
+        const queueUrl = _.getOr('missing', 'QueueUrl')(params);
+        const messageGroupId = _.getOr('missing', 'MessageGroupId')(params);
+        span.setTag("queue.address", queueUrl);
+        span.setTag("queue.messageGroupId", messageGroupId);
+        try {
+            const messageBody = JSON.parse(params.MessageBody);
+            const messageType = _.getOr('missing', 'type')(messageBody);
+            const messageContent = _.getOr('missing', 'content')(messageBody);
+            span.setTag("queue.message.type", messageType);
+            span.log({
+                event: 'queue.message.content',
+                value: messageContent,
+            });
+        }
+        catch (error) { }
         tracer.inject(span, FORMAT_TEXT_MAP, carrier);
         const messageAttributes = {
             'traceId': {
