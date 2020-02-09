@@ -10,6 +10,7 @@ const opentracing = Tracer.opentracing;
 const { Tags, FORMAT_TEXT_MAP, globalTracer } = opentracing;
 const tracer = globalTracer();
 const _ = require('lodash/fp');
+const TEN_MINUTES_IN_MS = 10 * 60 * 1000;
 
 config = extendDeep(defaultConfig, config.aws);
 const agent = config.agent;
@@ -31,8 +32,18 @@ const getSpanFromArgs = (args) => {
     return { newArgs, parentSpan };
 };
 
-const endSpan = (sendMessagePromise, span) =>
-    sendMessagePromise.then(() => {
+const endSpan = (sendMessagePromise, span) => {
+    const timeoutPromise = new Promise((resolve) => {
+        span.timeout = setTimeout(() => {
+            resolve('timeout');
+        }, TEN_MINUTES_IN_MS);
+    });     
+    return Promise.race([
+        sendMessagePromise,
+        timeoutPromise
+    ]).then((res) => {
+        if(span.timeout) clearTimeout(span.timeout);
+        if('timeout' === res) span.setTag("timeout", true);
         span.finish();
     }).catch((error) => {
         span.setTag(Tags.ERROR, true);
@@ -42,6 +53,7 @@ const endSpan = (sendMessagePromise, span) =>
         });
         span.finish();
     });
+}
 
 const sendMessageAsync = async (...args) => {
     const traceConfig = {};
@@ -56,7 +68,7 @@ const sendMessageAsync = async (...args) => {
         const queueUrl = _.getOr('missing', 'QueueUrl')(params);
         const messageGroupId = _.getOr('missing', 'MessageGroupId')(params);
         span.setTag("queue.address", queueUrl);
-        span.setTag("queue.messageGroupId", messageGroupId);
+        span.setTag("queue.message.groupId", messageGroupId);
         try {
             const messageBody = JSON.parse(params.MessageBody);
             const messageType = _.getOr('missing', 'type')(messageBody);
