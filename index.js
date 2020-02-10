@@ -59,7 +59,7 @@ const sendMessageAsync = (...args) => {
     args = newArgs;
     if (parentSpan) traceConfig.childOf = parentSpan;
     const params = _.find((arg) => 1 + _.indexOf('QueueUrl', _.keysIn(arg)))(args);
-    const span = tracer.startSpan('send message', traceConfig);
+    const span = tracer.startSpan('sendMessage', traceConfig);
     const carrier = {};
     if (params) {
         span.setTag(Tags.SPAN_KIND, Tags.SPAN_KIND_MESSAGING_PRODUCER);
