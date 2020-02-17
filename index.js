@@ -10,7 +10,7 @@ const opentracing = Tracer.opentracing;
 const { Tags, FORMAT_TEXT_MAP, globalTracer } = opentracing;
 const tracer = globalTracer();
 const _ = require('lodash/fp');
-const TEN_MINUTES_IN_MS = 10 * 60 * 1000;
+const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000;
 
 config = extendDeep(defaultConfig, config.aws);
 const agent = config.agent;
@@ -33,15 +33,15 @@ const getSpanFromArgs = (args) => {
 
 const timeoutPromise = (span) => new Promise((resolve) => {
     span.timeout = setTimeout(() => {
-        resolve('timeout');
-    }, TEN_MINUTES_IN_MS);
+        resolve('span.timeout');
+    }, TWO_HOURS_IN_MS);
 });
 
 const endSpan = async (sendMessagePromise, span) => {    
     try {
         const res = await Promise.race([sendMessagePromise, timeoutPromise(span)]);
         if (span.timeout) clearTimeout(span.timeout);
-        if ('timeout' === res) span.setTag("timeout", true);
+        if ('timeout' === res) span.setTag("span.timeout", true);
     }
     catch (error) {
         span.setTag(Tags.ERROR, true);
@@ -97,7 +97,7 @@ const sendMessageBatchAsync = (...args) => {
     args = newArgs;
     if (parentSpan) traceConfig.childOf = parentSpan;
     const params = _.find((arg) => 1 + _.indexOf('QueueUrl', _.keysIn(arg)))(args);
-    const span = tracer.startSpan('type', traceConfig);
+    const span = tracer.startSpan('sendMessage', traceConfig);
     const carrier = {};
     if (params) {
         span.setTag(Tags.SPAN_KIND, Tags.SPAN_KIND_MESSAGING_PRODUCER);
