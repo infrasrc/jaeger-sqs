@@ -44,11 +44,7 @@ const endSpan = async (sendMessagePromise, span) => {
         if ('timeout' === res) span.setTag("span.timeout", true);
     }
     catch (error) {
-        span.setTag(Tags.ERROR, true);
-        span.log({
-            event: 'error',
-            'error.object': error,
-        });
+        Tracer.logError(span, error, error.message, error.stack);
     }
     span.finish();
 }
