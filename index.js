@@ -15,13 +15,8 @@ const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000;
 config = extendDeep(defaultConfig, config.aws);
 const agent = config.agent;
 delete config.agent;
-AWS.config.update(
-    (config, {
-        httpOptions: {
-            agent: new https.Agent(agent.httpOptions)
-        }
-    })
-);
+config.httpOptions = new https.Agent(agent.httpOptions);
+AWS.config.update(config);
 
 const sqsClient = new AWS.SQS();
 
