@@ -10,7 +10,7 @@ const opentracing = Tracer.opentracing;
 const { Tags, FORMAT_TEXT_MAP, globalTracer } = opentracing;
 const tracer = globalTracer();
 const _ = require('lodash/fp');
-const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000;
+const TWENTY_FOUR_HOURS_IN_MS = 24 * 60 * 60 * 1000;
 
 config = extendDeep(defaultConfig, config.aws);
 const agent = config.agent;
@@ -29,7 +29,7 @@ const getSpanFromArgs = (args) => {
 const timeoutPromise = (span) => new Promise((resolve) => {
     span.timeout = setTimeout(() => {
         resolve('span.timeout');
-    }, TWO_HOURS_IN_MS);
+    }, TWENTY_FOUR_HOURS_IN_MS);
 });
 
 const endSpan = async (sendMessagePromise, span) => {    
